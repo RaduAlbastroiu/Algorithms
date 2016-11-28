@@ -6,14 +6,9 @@
 //  Copyright © 2016 Albastroiu Radu. All rights reserved.
 //
 
-#include <iostream>
-#include <iomanip>
 #include <fstream>
 #include <algorithm>
-#include <unordered_map>
 #include <vector>
-#include <cstring>
-#include <cmath>
 
 #define BASE 128
 #define HASH07 1000007
@@ -24,30 +19,25 @@ using namespace std;
 ifstream fin("strmatch.in");
 ofstream fout("strmatch.out");
 
-int first_hash_07, first_hash_09, second_hash_07, second_hash_09, power_mod_07, power_mod_09, size;
-string a, b;
-vector<int> positions;
-
 int main()
 {
-    
-    fin >> a;
-    fin >> b;
-    
-    power_mod_07 = 1;
-    power_mod_09 = 1;
-    
-    if ( a.size() > b.size())
-    {
-        fout << 0;
-        return 0;
-    }
+    string key_word, text;
 
-    for (int i = 0; i < a.size(); i++)
+    // read operations
+    fin >> key_word;
+    fin >> text;
+    
+    int power_mod_07 = 1;
+    int power_mod_09 = 1;
+    int first_hash_07 = 0;
+    int first_hash_09 = 0;
+    for (int i = 0; i < key_word.size(); i++)
     {
-        first_hash_07 = (first_hash_07 * BASE + (a[i])) % HASH07;
-        first_hash_09 = (first_hash_09 * BASE + (a[i])) % HASH09;
+        // 'ab' -> 'abc' for the key_word
+        first_hash_07 = (first_hash_07 * BASE + (key_word[i])) % HASH07;
+        first_hash_09 = (first_hash_09 * BASE + (key_word[i])) % HASH09;
         
+        // computing the power for lenght of the word
         if( i != 0 )
         {
             power_mod_07 = (power_mod_07 * BASE) % HASH07;
@@ -55,35 +45,45 @@ int main()
         }
     }
     
-    for (int i = 0; i < a.size(); i++)
+    
+    int second_hash_07 = 0;
+    int second_hash_09 = 0;
+    
+    // creating a hash from the text of lenght key_word
+    for (int i = 0; i < key_word.size(); i++)
     {
-        second_hash_07 = (second_hash_07 * BASE + (b[i])) % HASH07;
-        second_hash_09 = (second_hash_09 * BASE + (b[i])) % HASH09;
+        // 'ab' -> 'abc'
+        second_hash_07 = (second_hash_07 * BASE + (text[i])) % HASH07;
+        second_hash_09 = (second_hash_09 * BASE + (text[i])) % HASH09;
     }
     
+    vector<int> positions;
+    
+    // check if the hash is the same with the key_word for the first key_word.size elements
     if(first_hash_07 == second_hash_07 &&
        first_hash_09 == second_hash_09)
         positions.push_back(0);
     
-    for (int i = int(a.size()); i < b.size(); i++)
+    for (int i = int(key_word.size()); i < text.size(); i++)
     {
-        second_hash_07 = ((second_hash_07 - (power_mod_07 * (b[i - a.size()])) % HASH07 + HASH07) * BASE + (b[i])) % HASH07;
-        second_hash_09 = ((second_hash_09 - (power_mod_09 * (b[i - a.size()])) % HASH09 + HASH09) * BASE + (b[i])) % HASH09;
-        
+        // 'abc' -> 'bcd' deleting a char from front and adding another one to the back in one operation
+        second_hash_07 = ((second_hash_07 - (power_mod_07 * text[i - key_word.size()] ) % HASH07 + HASH07) * BASE + text[i]) % HASH07;
+        second_hash_09 = ((second_hash_09 - (power_mod_09 * text[i - key_word.size()] ) % HASH09 + HASH09) * BASE + text[i]) % HASH09;
+     
+        // check if the hash is the same with the key_word
         if(first_hash_07 == second_hash_07 &&
            first_hash_09 == second_hash_09)
-            positions.push_back(int(i - a.size() + 1));
+            
+            positions.push_back( int(i - key_word.size() + 1) );
     }
     
+    // print operations
     fout << positions.size() << "\n";
     
-    if(positions.size() > 1000)
-        size = 1000;
-    else
-        size = positions.size();
-    
-    for (int i = 0; i < size; i++)
-        fout << positions[i] << " ";
+    // prints only the first 1000 appearances
+    int i = 0;
+    while(i < 1000 && i < positions.size())
+        fout << positions[i++] << " ";
     
     return 0;
 }
