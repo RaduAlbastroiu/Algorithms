@@ -57,12 +57,17 @@ int main()
         second_hash_09 = (second_hash_09 * BASE + (text[i])) % HASH09;
     }
     
+    int nr = 0;
     vector<int> positions;
+    positions.reserve(1000);
     
     // check if the hash is the same with the key_word for the first key_word.size elements
     if(first_hash_07 == second_hash_07 &&
        first_hash_09 == second_hash_09)
-        positions.push_back(0);
+    {
+        nr++;
+        positions.emplace_back(0);
+    }
     
     for (int i = int(key_word.size()); i < text.size(); i++)
     {
@@ -73,17 +78,19 @@ int main()
         // check if the hash is the same with the key_word
         if(first_hash_07 == second_hash_07 &&
            first_hash_09 == second_hash_09)
-            
-            positions.push_back( int(i - key_word.size() + 1) );
+        {
+            nr++;
+            if(nr <= 1000)
+                positions.emplace_back(int(i - key_word.size() + 1));
+        }
     }
     
     // print operations
-    fout << positions.size() << "\n";
+    fout << nr << "\n";
     
     // prints only the first 1000 appearances
-    int i = 0;
-    while(i < 1000 && i < positions.size())
-        fout << positions[i++] << " ";
+    for( auto &element : positions)
+        fout << element << " ";
     
     return 0;
 }
